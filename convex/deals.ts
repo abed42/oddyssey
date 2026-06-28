@@ -65,6 +65,7 @@ export const listDeals = query({
           initials: d.initials,
           logo: d.logo,
           domain: d.domain,
+          industry: d.industry,
           dossier: d.dossier,
           bets: betRows.map(toModelBet),
           status: d.status,
@@ -97,6 +98,7 @@ export const getDeal = query({
       initials: d.initials,
       logo: d.logo,
       domain: d.domain,
+      industry: d.industry,
       dossier: d.dossier,
       bets: betRows.map(toModelBet),
       status: d.status,
@@ -112,6 +114,7 @@ export const createDeal = mutation({
     initials: v.string(),
     logo: v.optional(v.string()),
     domain: v.optional(v.string()),
+    industry: v.optional(v.string()),
     dossier: dossierValidator,
     status: v.optional(statusValidator),
   },
@@ -126,6 +129,7 @@ export const createDeal = mutation({
       initials: args.initials,
       logo: args.logo,
       domain: args.domain,
+      industry: args.industry,
       dossier: args.dossier,
       status: args.status ?? "cached",
     };
@@ -159,6 +163,18 @@ export const addSignal = mutation({
     await ctx.db.patch(d._id, {
       dossier: { ...d.dossier, signals: [...d.dossier.signals, signal] },
     });
+  },
+});
+
+// Tag a deal's industry without touching its dossier or bets.
+export const setIndustry = mutation({
+  args: { dealId: v.string(), industry: v.string() },
+  handler: async (ctx, { dealId, industry }) => {
+    const d = await ctx.db
+      .query("deals")
+      .withIndex("by_dealId", (q) => q.eq("dealId", dealId))
+      .unique();
+    if (d) await ctx.db.patch(d._id, { industry });
   },
 });
 

@@ -22,11 +22,14 @@ import { OddsHero } from "./OddsHero";
 import { useActiveSeller } from "./SellerContext";
 import { ModelGlyph } from "@/lib/peitho/modelIcons";
 
-const CATEGORIES: { key: "all" | DealAction; label: string }[] = [
+// Industry categories — the Polymarket-style topic nav.
+const CATEGORIES: { key: string; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "prioritize", label: "Prioritize" },
-  { key: "personalize", label: "Personalize" },
-  { key: "skip", label: "Skip" },
+  { key: "AI", label: "AI" },
+  { key: "Dev Tools", label: "Dev Tools" },
+  { key: "Fintech", label: "Fintech" },
+  { key: "SaaS", label: "SaaS" },
+  { key: "Infra", label: "Infra" },
 ];
 
 type SortKey = "volume" | "trending" | "newest";
@@ -35,14 +38,14 @@ const SORTS: SortKey[] = ["volume", "trending", "newest"];
 export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
   const { sellerId } = useActiveSeller();
   const deals = useQuery(api.deals.listDeals, { sellerId });
-  const [category, setCategory] = useState<"all" | DealAction>("all");
+  const [category, setCategory] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("volume");
   const [view, setView] = useState<"grid" | "table">("grid");
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const all = deals ?? [];
-  const filtered = all.filter((d) => category === "all" || d.action === category);
+  const filtered = all.filter((d) => category === "all" || d.industry === category);
   const shown = [...filtered].sort((a, b) => {
     if (sort === "trending") return b.spread - a.spread;
     if (sort === "newest") return 0;

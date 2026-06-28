@@ -19,6 +19,7 @@ export default defineSchema({
     initials: v.string(),
     logo: v.optional(v.string()), // company logo URL (Orange Slice)
     domain: v.optional(v.string()), // for live re-enrichment / signal detection
+    industry: v.optional(v.string()), // board category (AI, Fintech, …)
     dossier: v.object({
       summary: v.string(),
       signals: v.array(
