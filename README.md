@@ -1,32 +1,100 @@
-# Welcome to your Convex + Vercel app
+# Oddyssey — go-to-market intelligence
 
-This is a [Convex](https://convex.dev/) project demonstrating how to use Convex with Vercel.
+A **consensus prediction market for B2B purchase intent.** Four frontier models —
+Claude, GPT, Gemini, Grok — price the *same* evidence under *different* analytical
+lenses. The consensus tells you how strong a prospect is; **the disagreement tells
+you what to personalize.**
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+> Built for the AI Growth Hackathon (Orange Slice · YC) — track *Reading Minds:
+> Signal Detection, Lead-Building.*
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [Next.js](https://nextjs.org/) for optimized web hosting and page routing
-- [Tailwind](https://tailwindcss.com/) for building great looking accessible UI
-- [Vercel](https://vercel.com/) for hosting and deployment by integrating Convex through the Vercel Marketplace.
+![The Oddyssey board](docs/screenshot.png)
 
-## Get started
+## The idea
 
-Click the "Deploy" button to clone this repo, create a new Vercel project, setup the Convex integration, and provision a new Convex project:
+Every lead-scoring tool hands you a number. The score says 85 — **now what?**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fget-convex%2Fvercel-marketplace-convex&project-name=vercel-with-convex&repository-name=vercel-with-convex&demo-title=Convex%20with%20Vercel&demo-description=A%20minimal%20template%20showcasing%20using%20Convex%20with%20Vercel&demo-url=https%3A%2F%2Fconvex-vercel-template-demo.previews.convex.dev%2F&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22convex%22%2C%22productSlug%22%3A%22convex%22%2C%22protocol%22%3A%22storage%22%7D%5D)
+Oddyssey reframes *"will this prospect buy?"* as a market priced by a panel of
+models. Each model sees identical evidence through its own lens and prices
+purchase-likelihood 0–100:
 
-## Learn more
+- **Consensus** (the mean) → how strong the prospect is
+- **Spread** (max − min) → your confidence signal
+- **The disagreement** → exactly what to address before you reach out
 
-To learn more about developing your project with Convex, check out:
+When the panel agrees, act with confidence. When it splits, the spread points at
+the ambiguity. Every market terminates in an action — **prioritize · personalize ·
+skip.** The tiers *are* the workflow.
 
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
+## What it does
 
-## Join the community
+- **Live board** — 30 companies across industries (AI, Dev Tools, Fintech, SaaS,
+  Infra), each priced by the panel with **cited evidence**. Browse by category.
+- **Seller perspective** — switch workspace (Convex / Cursor / Orange Slice) and the
+  *same* prospect re-prices from that seller's ICP. A lead is worth different
+  amounts to different sellers, and the panel knows why.
+- **Signal detection** — a fresh buying signal lands and the panel **re-prices
+  live**. Watch a deal jump *personalize → prioritize* in seconds, every model
+  re-citing the new evidence.
+- **Search-builds-a-market** — name *any* company and Orange Slice + the panel build
+  and price a brand-new market on demand, routing to its dedicated market page.
+- **Market pages** — a Polymarket-style page per prospect: odds, spread, the panel's
+  per-model votes + reasoning, and the recommended action.
 
-Join thousands of developers building full-stack apps with Convex:
+![A market page](docs/market-page.png)
 
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
+## How it's built
+
+```
+Convex               real-time engine — ONE reactive subscription; each model
+                     writes its bet as it lands and the board animates. Zero polling.
+Vercel AI Gateway    parallel fan-out to 4 frontier models, strict structured output
+Orange Slice         real company data — LinkedIn, Crunchbase, BuiltWith, news
+                     (model-enrichment fallback so a build never stalls)
+Next.js (App Router) live board + dedicated market pages, Tailwind + shadcn/ui
+```
+
+The architecture keeps the contract and logic pure (`lib/peitho/`), with Convex as
+the only stateful surface:
+
+- **One bet row per `(dealId, sellerId, model)`** is the cache key *and* makes the
+  four parallel model calls race-free — no array to clobber.
+- **The board derives entirely from bets** — writing a single bet row re-fires the
+  `useQuery` subscription, so the board animates with no polling.
+- **Each model gets a distinct system-prompt lens**, so identical evidence yields
+  meaningful spread. The upgrade path swaps each lens for the model's native live
+  tool — contract unchanged.
+
+## Run it
+
+```bash
+npm install
+npx convex env set AI_GATEWAY_API_KEY <key>     # for the model panel
+npx convex env set ORANGESLICE_API_KEY <key>    # optional — for live enrichment
+npm run dev                                      # Next.js + local Convex
+```
+
+Open **http://localhost:3000**. Seed a board and price the hero live:
+
+```bash
+bun Tools/reset-demo.ts          # seed the board + put the hero at its "before" state
+bun test lib/peitho/             # the pure contract/logic unit tests
+```
+
+## Map
+
+- `lib/peitho/` — pure contract + logic: `types`, `config` (tunable thresholds +
+  model lenses), `derive` (deal assembly), `prompt` (per-lens prompts), `sellers`,
+  `signals`, `orangeslice` (enrichment).
+- `convex/engine.ts` — `"use node"` actions: `priceDeal` (gateway fan-out),
+  `detectSignal` (re-enrich + re-price), `buildMarket` (search → build → price).
+- `convex/deals.ts` — reactive queries + mutations; the bet-per-model cache.
+- `app/` — board (`/`), cold-open story (`/ai-hackathon`), market pages
+  (`/market/[id]`).
+- `components/board/` — board, market cards, market page, ticker, seller switcher.
+- `REHEARSAL.md` — the 5–7 minute demo runbook.
+
+---
+
+*Everything is sales — a deal, a hire, even getting into a hackathon. Oddyssey
+prices the one case businesses pay for: will this prospect buy.*
