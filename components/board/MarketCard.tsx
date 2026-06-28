@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import type { Deal } from "@/lib/peitho/types";
-import { ACTION_DISPLAY, agreementBadge, consensusStdDev, guerrillaMove } from "@/lib/peitho/display";
+import { ACTION_DISPLAY, guerrillaMove } from "@/lib/peitho/display";
 import { EASE_OUT } from "@/lib/ease";
 import { AnimatedNumber, fmtPct, fmtCents } from "@/components/AnimatedNumber";
 import { ConsensusStrip } from "./ConsensusStrip";
@@ -11,8 +11,6 @@ import { CompanyLogo } from "./CompanyLogo";
 export function MarketCard({ deal, onClick }: { deal: Deal; onClick?: () => void }) {
   const yes = deal.consensus;
   const no = 100 - yes;
-  const badge = agreementBadge(consensusStdDev(deal.bets));
-  const hot = deal.spread >= 25;
   const move = guerrillaMove(deal);
 
   return (
@@ -27,19 +25,8 @@ export function MarketCard({ deal, onClick }: { deal: Deal; onClick?: () => void
           <p className="line-clamp-2 min-w-0 flex-1 text-sm font-semibold leading-tight text-foreground">
             Will {deal.name} convert?
           </p>
-          <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold ring-1 ${badge.cls}`}>
-            {badge.label}
-          </span>
-        </div>
-        <div className="mt-2 flex items-center gap-2 pl-12">
-          <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 ${ACTION_DISPLAY[deal.action].tone} ${ACTION_DISPLAY[deal.action].ring} ${ACTION_DISPLAY[deal.action].text}`}>
+          <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 ${ACTION_DISPLAY[deal.action].tone} ${ACTION_DISPLAY[deal.action].ring} ${ACTION_DISPLAY[deal.action].text}`}>
             {ACTION_DISPLAY[deal.action].label}
-          </span>
-          {hot && (
-            <span className="text-[10px] font-semibold text-amber-400">↗ Contested</span>
-          )}
-          <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">
-            ±{deal.spread} spread
           </span>
         </div>
       </div>
