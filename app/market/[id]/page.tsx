@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useQuery, useAction } from "convex/react";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { ALL_MODELS } from "@/lib/peitho/config";
 import { AppShell } from "@/components/board/AppShell";
 import { OddsChart } from "@/components/board/OddsChart";
 import { DetectSignal } from "@/components/board/DetectSignal";
@@ -22,6 +23,23 @@ const settle = (price: number): number[] => {
   const n = 6;
   return Array.from({ length: n }, (_, k) => Math.round(50 + (price - 50) * (k / (n - 1))));
 };
+
+function Sk({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded bg-muted ${className}`} />;
+}
+
+function SkeletonVote() {
+  return (
+    <div className="rounded-lg bg-muted/50 px-3 py-2.5">
+      <div className="flex items-center justify-between">
+        <Sk className="h-4 w-16" />
+        <Sk className="h-4 w-10" />
+      </div>
+      <Sk className="mt-2 h-3 w-full" />
+      <Sk className="mt-1.5 h-3 w-2/3" />
+    </div>
+  );
+}
 
 function RelatedMarkets({ currentId }: { currentId: string }) {
   const router = useRouter();
@@ -58,6 +76,7 @@ function MarketDetail({ deal }: { deal: Deal }) {
   const router = useRouter();
   const { sellerId, seller } = useActiveSeller();
   const priceDeal = useAction(api.engine.priceDeal);
+  const clearBets = useMutation(api.deals.clearBets);
   const [running, setRunning] = useState(false);
 
   const action = ACTION_DISPLAY[deal.action];
@@ -66,10 +85,14 @@ function MarketDetail({ deal }: { deal: Deal }) {
   const no = 100 - yes;
   const [lo, hi] = betRange(deal.bets);
   const live = deal.status === "pending" || deal.status === "resolving";
+  const pricing = running || live; // a re-run is in progress
+  const ready = !pricing && deal.bets.length > 0; // show settled values
+  const byModel = new Map(deal.bets.map((b) => [b.model, b]));
 
   async function run() {
     setRunning(true);
     try {
+      await clearBets({ dealId: deal.id, sellerId }); // empty → votes fill fresh
       await priceDeal({ dealId: deal.id, force: true, sellerId });
     } finally {
       setRunning(false);
@@ -103,35 +126,47 @@ function MarketDetail({ deal }: { deal: Deal }) {
           </div>
 
           {/* big Yes/No */}
-          <div>
-            <div className="flex h-12 overflow-hidden rounded-xl text-base font-bold">
-              <div
-                className="flex items-center justify-center gap-2 bg-primary text-primary-foreground transition-all duration-500"
-                style={{ width: `${yes}%` }}
-              >
-                <span>Yes</span>
-                <span className="tabular-nums">{yes}%</span>
+          {ready ? (
+            <div>
+              <div className="flex h-12 overflow-hidden rounded-xl text-base font-bold">
+                <div
+                  className="flex items-center justify-center gap-2 bg-primary text-primary-foreground transition-all duration-500"
+                  style={{ width: `${yes}%` }}
+                >
+                  <span>Yes</span>
+                  <span className="tabular-nums">{yes}%</span>
+                </div>
+                <div className="flex flex-1 items-center justify-center gap-2 bg-destructive text-white">
+                  <span>No</span>
+                  <span className="tabular-nums">{no}%</span>
+                </div>
               </div>
-              <div className="flex flex-1 items-center justify-center gap-2 bg-destructive text-white">
-                <span>No</span>
-                <span className="tabular-nums">{no}%</span>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                consensus {yes}% · spread ±{deal.spread} ({lo}–{hi}) · {tier.blurb}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <Sk className="h-12 w-full rounded-xl" />
+              <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="h-2 w-2 animate-ping rounded-full bg-primary" />
+                panel re-pricing…
               </div>
             </div>
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              consensus {yes}% · spread ±{deal.spread} ({lo}–{hi}) · {tier.blurb}
-            </p>
-          </div>
+          )}
 
           {/* chart */}
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="mb-1 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
               How the panel landed
             </div>
-            {deal.bets.length > 0 && (
+            {ready ? (
               <OddsChart
                 series={deal.bets.map((b) => ({ model: b.model, points: settle(b.price) }))}
                 consensus={deal.consensus}
               />
+            ) : (
+              <Sk className="h-[150px] w-full" />
             )}
           </div>
 
@@ -162,10 +197,12 @@ function MarketDetail({ deal }: { deal: Deal }) {
               AI model votes — how each concluded
             </div>
             <div className="space-y-3">
-              {deal.bets.map((b) => {
+              {ALL_MODELS.map((m) => {
+                const b = byModel.get(m);
+                if (!b) return pricing ? <SkeletonVote key={m} /> : null;
                 const { color, label } = modelDisplay(b.model);
                 return (
-                  <div key={b.model} className="rounded-lg bg-muted px-3 py-2.5">
+                  <div key={b.model} className="rounded-lg bg-muted px-3 py-2.5 animate-[betIn_400ms_ease-out]">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold" style={{ color }}>
                         {label}
@@ -198,17 +235,26 @@ function MarketDetail({ deal }: { deal: Deal }) {
         <aside className="space-y-4">
           <div className="sticky top-[120px] space-y-4">
             <div className="rounded-xl border border-border bg-card p-4">
-              <div
-                className={`mb-3 flex items-center gap-2 rounded-lg px-3 py-2.5 ring-1 ${action.tone} ${action.ring}`}
-              >
-                <span className={`text-sm font-bold uppercase tracking-wide ${action.text}`}>
-                  {action.label}
-                </span>
-                <span className="text-2xl font-bold tabular-nums" style={{ color: tier.accent }}>
-                  {yes}%
-                </span>
-              </div>
-              <p className="mb-3 text-sm text-foreground">{actionLine(deal)}</p>
+              {ready ? (
+                <>
+                  <div
+                    className={`mb-3 flex items-center gap-2 rounded-lg px-3 py-2.5 ring-1 ${action.tone} ${action.ring}`}
+                  >
+                    <span className={`text-sm font-bold uppercase tracking-wide ${action.text}`}>
+                      {action.label}
+                    </span>
+                    <span className="text-2xl font-bold tabular-nums" style={{ color: tier.accent }}>
+                      {yes}%
+                    </span>
+                  </div>
+                  <p className="mb-3 text-sm text-foreground">{actionLine(deal)}</p>
+                </>
+              ) : (
+                <div className="mb-3">
+                  <Sk className="h-11 w-full rounded-lg" />
+                  <Sk className="mt-2 h-4 w-3/4" />
+                </div>
+              )}
               <div className="flex flex-col gap-2">
                 <button
                   onClick={run}
