@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { assembleDeal } from "../lib/peitho/derive";
 import { PROBE_DEAL_ID } from "../lib/peitho/config";
+import { DEFAULT_SELLER_ID } from "../lib/peitho/sellers";
 import type { Deal, ModelBet } from "../lib/peitho/types";
 
 const dossierValidator = v.object({
@@ -44,8 +45,9 @@ function toModelBet(row: {
 // Reactive read: every Deal, fully derived from its bets. Writing a single bet
 // row re-fires this subscription — this is how the board animates with NO poll.
 export const listDeals = query({
-  args: {},
-  handler: async (ctx): Promise<Deal[]> => {
+  args: { sellerId: v.optional(v.string()) },
+  handler: async (ctx, { sellerId }): Promise<Deal[]> => {
+    const seller = sellerId ?? DEFAULT_SELLER_ID;
     const allDeals = await ctx.db.query("deals").collect();
     // The probe deal is an internal architecture-proof deal — never on the board.
     const deals = allDeals.filter((d) => d.dealId !== PROBE_DEAL_ID);
@@ -53,7 +55,9 @@ export const listDeals = query({
       deals.map(async (d) => {
         const betRows = await ctx.db
           .query("bets")
-          .withIndex("by_dealId", (q) => q.eq("dealId", d.dealId))
+          .withIndex("by_deal_seller", (q) =>
+            q.eq("dealId", d.dealId).eq("sellerId", seller),
+          )
           .collect();
         return assembleDeal({
           id: d.dealId,
@@ -72,8 +76,9 @@ export const listDeals = query({
 });
 
 export const getDeal = query({
-  args: { dealId: v.string() },
-  handler: async (ctx, { dealId }): Promise<Deal | null> => {
+  args: { dealId: v.string(), sellerId: v.optional(v.string()) },
+  handler: async (ctx, { dealId, sellerId }): Promise<Deal | null> => {
+    const seller = sellerId ?? DEFAULT_SELLER_ID;
     const d = await ctx.db
       .query("deals")
       .withIndex("by_dealId", (q) => q.eq("dealId", dealId))
@@ -81,7 +86,9 @@ export const getDeal = query({
     if (!d) return null;
     const betRows = await ctx.db
       .query("bets")
-      .withIndex("by_dealId", (q) => q.eq("dealId", dealId))
+      .withIndex("by_deal_seller", (q) =>
+        q.eq("dealId", dealId).eq("sellerId", seller),
+      )
       .collect();
     return assembleDeal({
       id: d.dealId,
@@ -167,6 +174,7 @@ export const setStatus = mutation({
 export const upsertBet = mutation({
   args: {
     dealId: v.string(),
+    sellerId: v.optional(v.string()),
     model: v.string(),
     price: v.number(),
     confidence: v.number(),
@@ -175,27 +183,32 @@ export const upsertBet = mutation({
     toolCalls: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
+    const sellerId = args.sellerId ?? DEFAULT_SELLER_ID;
+    const row = { ...args, sellerId };
     const existing = await ctx.db
       .query("bets")
-      .withIndex("by_deal_model", (q) =>
-        q.eq("dealId", args.dealId).eq("model", args.model),
+      .withIndex("by_deal_seller_model", (q) =>
+        q.eq("dealId", args.dealId).eq("sellerId", sellerId).eq("model", args.model),
       )
       .unique();
     if (existing) {
-      await ctx.db.patch(existing._id, args);
+      await ctx.db.patch(existing._id, row);
     } else {
-      await ctx.db.insert("bets", args);
+      await ctx.db.insert("bets", row);
     }
   },
 });
 
 // Cache probe used by the engine: which models already have a bet for this deal.
 export const cachedModels = query({
-  args: { dealId: v.string() },
-  handler: async (ctx, { dealId }): Promise<string[]> => {
+  args: { dealId: v.string(), sellerId: v.optional(v.string()) },
+  handler: async (ctx, { dealId, sellerId }): Promise<string[]> => {
+    const seller = sellerId ?? DEFAULT_SELLER_ID;
     const rows = await ctx.db
       .query("bets")
-      .withIndex("by_dealId", (q) => q.eq("dealId", dealId))
+      .withIndex("by_deal_seller", (q) =>
+        q.eq("dealId", dealId).eq("sellerId", seller),
+      )
       .collect();
     return rows.map((r) => r.model);
   },
@@ -203,12 +216,19 @@ export const cachedModels = query({
 
 // Dev/stage helper: wipe a deal's bets so it can be re-priced live.
 export const clearBets = mutation({
-  args: { dealId: v.string() },
-  handler: async (ctx, { dealId }) => {
-    const rows = await ctx.db
-      .query("bets")
-      .withIndex("by_dealId", (q) => q.eq("dealId", dealId))
-      .collect();
+  args: { dealId: v.string(), sellerId: v.optional(v.string()) },
+  handler: async (ctx, { dealId, sellerId }) => {
+    const rows = sellerId
+      ? await ctx.db
+          .query("bets")
+          .withIndex("by_deal_seller", (q) =>
+            q.eq("dealId", dealId).eq("sellerId", sellerId),
+          )
+          .collect()
+      : await ctx.db
+          .query("bets")
+          .withIndex("by_dealId", (q) => q.eq("dealId", dealId))
+          .collect();
     await Promise.all(rows.map((r) => ctx.db.delete(r._id)));
   },
 });

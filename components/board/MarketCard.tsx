@@ -1,8 +1,11 @@
 "use client";
 
+import { motion } from "motion/react";
 import type { Deal } from "@/lib/peitho/types";
 import { ALL_MODELS } from "@/lib/peitho/config";
 import { ACTION_DISPLAY, agreementBadge, consensusStdDev, guerrillaMove } from "@/lib/peitho/display";
+import { EASE_OUT } from "@/lib/ease";
+import { AnimatedNumber, fmtPct, fmtCents } from "@/components/AnimatedNumber";
 import { ModelBar } from "./ModelBar";
 import { CompanyLogo } from "./CompanyLogo";
 
@@ -19,7 +22,7 @@ export function MarketCard({ deal, onClick }: { deal: Deal; onClick?: () => void
   return (
     <div
       onClick={onClick}
-      className="group cursor-pointer overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:border-primary/30 hover:bg-secondary/40"
+      className="group cursor-pointer overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:bg-secondary/30 hover:shadow-xl"
     >
       {/* header: identity + the implicit market question */}
       <div className="p-4 pb-3">
@@ -45,19 +48,25 @@ export function MarketCard({ deal, onClick }: { deal: Deal; onClick?: () => void
       {/* Yes/No odds bar */}
       <div className="px-4 pb-3">
         <div className="flex h-6 overflow-hidden rounded-lg text-xs font-bold">
-          <div
-            className="flex items-center justify-center bg-primary text-primary-foreground transition-all duration-300"
-            style={{ width: `${yes}%` }}
+          <motion.div
+            className="flex items-center justify-center overflow-hidden bg-primary text-primary-foreground"
+            initial={{ width: "50%" }}
+            animate={{ width: `${yes}%` }}
+            transition={{ duration: 1.2, ease: EASE_OUT }}
           >
-            {yes >= 20 && <span className="tabular-nums">{yes}%</span>}
-          </div>
-          <div className="flex flex-1 items-center justify-center bg-destructive text-white transition-all duration-300">
-            {no >= 20 && <span className="tabular-nums">{no}%</span>}
+            {yes >= 20 && <AnimatedNumber value={yes} format={fmtPct} />}
+          </motion.div>
+          <div className="flex flex-1 items-center justify-center overflow-hidden bg-destructive text-white">
+            {no >= 20 && <AnimatedNumber value={no} format={fmtPct} />}
           </div>
         </div>
         <div className="mt-1 flex justify-between">
-          <span className="text-[11px] font-semibold text-primary">Yes {yes}¢</span>
-          <span className="text-[11px] font-semibold text-destructive">No {no}¢</span>
+          <span className="text-[11px] font-semibold text-primary">
+            Yes <AnimatedNumber value={yes} format={fmtCents} />
+          </span>
+          <span className="text-[11px] font-semibold text-destructive">
+            No <AnimatedNumber value={no} format={fmtCents} />
+          </span>
         </div>
       </div>
 

@@ -4,13 +4,16 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { Search, Zap } from "lucide-react";
 import { Logomark } from "./Logomark";
+import { SellerSwitcher } from "./SellerSwitcher";
 import { api } from "@/convex/_generated/api";
 import { ALL_MODELS, MODEL_LENSES, PRODUCT } from "@/lib/peitho/config";
 import { modelDisplay } from "@/lib/peitho/display";
 import type { Deal, DealAction } from "@/lib/peitho/types";
 import { MarketCard } from "./MarketCard";
 import { FeaturedMarket } from "./FeaturedMarket";
+import { useActiveSeller } from "./SellerContext";
 import { ModelAvatar, ModelGlyph } from "@/lib/peitho/modelIcons";
+import { AnimatedNumber, fmtPct } from "@/components/AnimatedNumber";
 
 const CATEGORIES: { key: "all" | DealAction; label: string }[] = [
   { key: "all", label: "All" },
@@ -23,7 +26,8 @@ type SortKey = "volume" | "trending" | "newest";
 const SORTS: SortKey[] = ["volume", "trending", "newest"];
 
 export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
-  const deals = useQuery(api.deals.listDeals);
+  const { sellerId } = useActiveSeller();
+  const deals = useQuery(api.deals.listDeals, { sellerId });
   const [category, setCategory] = useState<"all" | DealAction>("all");
   const [sort, setSort] = useState<SortKey>("volume");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -55,6 +59,8 @@ export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
             <span className="text-xl font-bold tracking-tight text-foreground">
               {PRODUCT.name}
             </span>
+            <span className="text-xl font-light text-muted-foreground">/</span>
+            <SellerSwitcher />
           </div>
 
           <nav className="ml-auto flex items-center gap-1">
@@ -128,7 +134,13 @@ export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
                 <ModelGlyph model={m} size={20} />
                 <span className="text-sm font-semibold text-foreground">{label}</span>
                 <span className="hidden text-[11px] text-muted-foreground sm:inline">
-                  {conf !== null ? `avg ${conf}% conf` : MODEL_LENSES[m as keyof typeof MODEL_LENSES]?.lens}
+                  {conf !== null ? (
+                    <>
+                      avg <AnimatedNumber value={conf} format={fmtPct} /> conf
+                    </>
+                  ) : (
+                    MODEL_LENSES[m as keyof typeof MODEL_LENSES]?.lens
+                  )}
                 </span>
                 <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
                   Live

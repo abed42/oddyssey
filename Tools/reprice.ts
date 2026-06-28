@@ -14,7 +14,7 @@ const convex = new ConvexHttpClient(url);
 const deals = await convex.query(api.deals.listDeals, {});
 console.log(`\n▸ re-pricing ${deals.length} deals as ${sellerId}…\n`);
 for (const d of deals) {
-  await convex.mutation(api.deals.clearBets, { dealId: d.id });
+  await convex.mutation(api.deals.clearBets, { dealId: d.id, sellerId });
   const r = await convex.action(api.engine.priceDeal, { dealId: d.id, sellerId });
   console.log(
     `  ${r.name.slice(0, 22).padEnd(23)} ${String(r.consensus).padStart(3)}%  tier ${r.tier} → ${r.action}`,

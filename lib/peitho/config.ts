@@ -5,7 +5,7 @@ import type { ModelId } from "./types";
 
 // Product identity — NOT locked in; this is a prototype. Rename here only.
 export const PRODUCT = {
-  name: "Peitho",
+  name: "Oddyssey",
   tagline: "go-to-market intelligence",
 } as const;
 

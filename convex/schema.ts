@@ -38,6 +38,7 @@ export default defineSchema({
 
   bets: defineTable({
     dealId: v.string(),
+    sellerId: v.optional(v.string()), // which seller this bet is priced for
     model: v.string(), // "claude" | "gpt" | "gemini" | "grok"
     price: v.number(), // 0-100
     confidence: v.number(), // 0-1
@@ -46,5 +47,7 @@ export default defineSchema({
     toolCalls: v.optional(v.array(v.string())),
   })
     .index("by_dealId", ["dealId"])
-    .index("by_deal_model", ["dealId", "model"]), // unique cache key
+    .index("by_deal_model", ["dealId", "model"])
+    .index("by_deal_seller", ["dealId", "sellerId"])
+    .index("by_deal_seller_model", ["dealId", "sellerId", "model"]), // cache key
 });

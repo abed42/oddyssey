@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { useAction, useMutation } from "convex/react";
 import { Users, BarChart2, Activity } from "lucide-react";
+import { EASE_OUT } from "@/lib/ease";
+import { AnimatedNumber, fmtPct, fmtCents, fmtSpread } from "@/components/AnimatedNumber";
 import { api } from "@/convex/_generated/api";
 import type { Deal } from "@/lib/peitho/types";
 import { HERO_DEAL_ID } from "@/lib/peitho/config";
@@ -43,7 +46,7 @@ export function FeaturedMarket({ deal, onClose }: { deal: Deal; onClose: () => v
   }
 
   return (
-    <div className="mb-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-card to-secondary/40">
+    <div className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-card to-secondary/40">
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-1 items-start gap-4">
@@ -85,29 +88,37 @@ export function FeaturedMarket({ deal, onClose }: { deal: Deal; onClose: () => v
           {/* left: consensus price + action */}
           <div>
             <div className="mb-2 flex h-10 overflow-hidden rounded-xl text-sm font-bold">
-              <div
-                className="flex items-center justify-center gap-1 bg-primary text-primary-foreground"
-                style={{ width: `${yes}%` }}
+              <motion.div
+                className="flex items-center justify-center gap-1 overflow-hidden bg-primary text-primary-foreground"
+                initial={{ width: "50%" }}
+                animate={{ width: `${yes}%` }}
+                transition={{ duration: 1.2, ease: EASE_OUT }}
               >
                 <span>Yes</span>
-                <span className="tabular-nums">{yes}%</span>
-              </div>
-              <div className="flex flex-1 items-center justify-center gap-1 bg-destructive text-white">
+                <AnimatedNumber value={yes} format={fmtPct} />
+              </motion.div>
+              <div className="flex flex-1 items-center justify-center gap-1 overflow-hidden bg-destructive text-white">
                 <span>No</span>
-                <span className="tabular-nums">{no}%</span>
+                <AnimatedNumber value={no} format={fmtPct} />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="rounded-lg bg-muted p-3 text-center">
-                <p className="text-lg font-bold tabular-nums text-primary">{yes}¢</p>
+                <p className="text-lg font-bold tabular-nums text-primary">
+                  <AnimatedNumber value={yes} format={fmtCents} />
+                </p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">Consensus Yes</p>
               </div>
               <div className="rounded-lg bg-muted p-3 text-center">
-                <p className="text-lg font-bold tabular-nums text-destructive">{no}¢</p>
+                <p className="text-lg font-bold tabular-nums text-destructive">
+                  <AnimatedNumber value={no} format={fmtCents} />
+                </p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">Consensus No</p>
               </div>
               <div className="rounded-lg bg-muted p-3 text-center">
-                <p className="text-lg font-bold tabular-nums text-foreground">±{deal.spread}</p>
+                <p className="text-lg font-bold tabular-nums text-foreground">
+                  <AnimatedNumber value={deal.spread} format={fmtSpread} />
+                </p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">Model Spread</p>
               </div>
             </div>
@@ -171,14 +182,41 @@ export function FeaturedMarket({ deal, onClose }: { deal: Deal; onClose: () => v
                         {label}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-primary">Yes {b.price}%</span>
-                        <span className="text-[11px] font-bold text-destructive">No {100 - b.price}%</span>
+                        <span className="text-[11px] font-bold text-primary">
+                          Yes <AnimatedNumber value={b.price} format={fmtPct} />
+                        </span>
+                        <span className="text-[11px] font-bold text-destructive">
+                          No <AnimatedNumber value={100 - b.price} format={fmtPct} />
+                        </span>
                       </div>
                     </div>
                     <div className="flex h-2 overflow-hidden rounded-md">
-                      <div className="h-full bg-primary" style={{ width: `${b.price}%` }} />
+                      <motion.div
+                        className="h-full overflow-hidden bg-primary"
+                        initial={{ width: "50%" }}
+                        animate={{ width: `${b.price}%` }}
+                        transition={{ duration: 1.2, ease: EASE_OUT }}
+                      />
                       <div className="h-full flex-1 bg-destructive" />
                     </div>
+                    {b.rationale && (
+                      <p className="mt-1.5 text-[11px] leading-snug text-foreground/80">
+                        {b.rationale}
+                      </p>
+                    )}
+                    {b.signalsUsed.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {b.signalsUsed.slice(0, 3).map((s, i) => (
+                          <span
+                            key={i}
+                            className="rounded bg-background/60 px-1.5 py-0.5 text-[9px] text-muted-foreground ring-1 ring-border"
+                            title={s}
+                          >
+                            {s.length > 46 ? s.slice(0, 46) + "…" : s}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {b.price === maxVote && (
                       <p className="mt-1 text-[10px] text-muted-foreground">↑ Highest conviction on Yes</p>
                     )}

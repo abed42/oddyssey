@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { PROBE_DEAL_ID } from "@/lib/peitho/config";
+import { useActiveSeller } from "./SellerContext";
 import { TIER_DISPLAY } from "@/lib/peitho/display";
 import type { Deal } from "@/lib/peitho/types";
 
@@ -66,7 +67,8 @@ function TickerItem({ deal }: { deal: Deal }) {
 }
 
 export function Ticker() {
-  const deals = useQuery(api.deals.listDeals);
+  const { sellerId } = useActiveSeller();
+  const deals = useQuery(api.deals.listDeals, { sellerId });
   const items = (deals ?? []).filter((d) => d.id !== PROBE_DEAL_ID);
   if (items.length === 0) return null;
 

@@ -54,7 +54,7 @@ export const priceDeal = action({
     const seller = getSeller(sellerId ?? DEFAULT_SELLER_ID);
 
     const cached = new Set(
-      await ctx.runQuery(api.deals.cachedModels, { dealId }),
+      await ctx.runQuery(api.deals.cachedModels, { dealId, sellerId: seller.id }),
     );
 
     await ctx.runMutation(api.deals.setStatus, { dealId, status: "pending" });
@@ -80,6 +80,7 @@ export const priceDeal = action({
 
         await ctx.runMutation(api.deals.upsertBet, {
           dealId,
+          sellerId: seller.id,
           model,
           price: Math.round(clamp(object.price, 0, 100)),
           confidence: Number(clamp(object.confidence, 0, 1).toFixed(2)),
@@ -104,7 +105,7 @@ export const priceDeal = action({
     }
 
     await ctx.runMutation(api.deals.setStatus, { dealId, status: "settled" });
-    const settled = await ctx.runQuery(api.deals.getDeal, { dealId });
+    const settled = await ctx.runQuery(api.deals.getDeal, { dealId, sellerId: seller.id });
     if (!settled) throw new Error(`priceDeal: deal "${dealId}" vanished mid-run`);
     return settled;
   },
