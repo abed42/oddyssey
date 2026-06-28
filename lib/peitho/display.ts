@@ -10,7 +10,7 @@ export const MODEL_DISPLAY: Record<
   { label: string; color: string; version: string }
 > = {
   claude: { label: "Claude", color: "#D97757", version: "Sonnet 4.6" }, // clay
-  gpt: { label: "GPT", color: "#10A37F", version: "GPT-5.4" }, // teal
+  gpt: { label: "GPT", color: "#FFFFFF", version: "GPT-5.4" }, // white (OpenAI mono)
   gemini: { label: "Gemini", color: "#4285F4", version: "Gemini 3 Pro" }, // blue
   grok: { label: "Grok", color: "#8B5CF6", version: "Grok 4.1" }, // violet
 };

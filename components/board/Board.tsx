@@ -13,6 +13,7 @@ import { modelDisplay } from "@/lib/peitho/display";
 import type { Deal, DealAction } from "@/lib/peitho/types";
 import { MarketCard } from "./MarketCard";
 import { FeaturedMarket } from "./FeaturedMarket";
+import { OddsHero } from "./OddsHero";
 import { useActiveSeller } from "./SellerContext";
 import { ModelAvatar, ModelGlyph } from "@/lib/peitho/modelIcons";
 import { AnimatedNumber, fmtPct } from "@/components/AnimatedNumber";
@@ -120,6 +121,9 @@ export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
 
       {/* ── Main ───────────────────────────────────────── */}
       <main className="mx-auto max-w-[1440px] px-6 py-6">
+
+        {/* Animated hero: companies orbit with their odds */}
+        <OddsHero deals={all} />
 
         {/* AI model status strip */}
         <div className="mb-6 flex gap-3 overflow-x-auto pb-1">

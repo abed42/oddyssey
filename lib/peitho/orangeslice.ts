@@ -107,20 +107,23 @@ export async function enrichDossier(input: {
   }
 
   // ── deep: hiring (jobs) + tech stack — the real fit evidence ──────────────
-  if (input.deep && r.linkedin_company_id) {
-    const id = Number(r.linkedin_company_id);
-    const [jobsRes, techRes] = await Promise.all([
-      services.company.linkedin
-        .search({
-          sql: `SELECT title FROM linkedin_job WHERE linkedin_company_id = ${id} ORDER BY posted_date DESC NULLS LAST LIMIT 40`,
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .catch((): any => null),
-      services.builtWith
-        .lookupDomain({ domain: input.domain })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (input.deep) {
+    const id = r.linkedin_company_id ? Number(r.linkedin_company_id) : null;
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const [jobsRes, techRes, newsRes] = await Promise.all([
+      id
+        ? services.company.linkedin
+            .search({
+              sql: `SELECT title FROM linkedin_job WHERE linkedin_company_id = ${id} ORDER BY posted_date DESC NULLS LAST LIMIT 40`,
+            })
+            .catch((): any => null)
+        : Promise.resolve(null),
+      services.builtWith.lookupDomain({ domain: input.domain }).catch((): any => null),
+      services.predictLeads
+        .companyNewsEvents({ company_id_or_domain: input.domain, limit: 12 })
         .catch((): any => null),
     ]);
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     // hiring — engineering roles are the strongest "they're building" signal
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -152,6 +155,32 @@ export async function enrichDossier(input: {
       const list = (relevant.length ? relevant : [...new Set(techs)].slice(0, 5)).join(", ");
       signals.push({ source: "builtwith", claim: `tech stack: ${list}` });
     }
+
+    // news events — real, dated buying signals from PredictLeads. The strongest
+    // "something happened" evidence: financing, launches, integrations, hiring.
+    const GOOD = new Set([
+      "receives_financing", "invests_into", "launches", "partners_with",
+      "integrates_with", "hires", "is_developing", "expands_facilities",
+      "expands_offices_to", "expands_offices_in", "opens_new_location",
+      "goes_public", "has_revenue", "receives_award", "signs_new_client",
+    ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const events: any[] = ((newsRes as any)?.data as any[]) ?? [];
+    const newsSignals = events
+      .filter((e) => GOOD.has(e?.attributes?.category))
+      .sort((a, b) =>
+        String(b?.attributes?.found_at ?? "").localeCompare(String(a?.attributes?.found_at ?? "")),
+      )
+      .slice(0, 5)
+      .map((e) => ({
+        source: "news",
+        claim: String(e.attributes.summary || e.attributes.article_sentence || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 170),
+      }))
+      .filter((s) => s.claim.length > 0);
+    signals.push(...newsSignals);
   }
 
   const summary = (
