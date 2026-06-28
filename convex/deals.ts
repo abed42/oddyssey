@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { assembleDeal } from "../lib/peitho/derive";
+import { PROBE_DEAL_ID } from "../lib/peitho/config";
 import type { Deal, ModelBet } from "../lib/peitho/types";
 
 const dossierValidator = v.object({
@@ -45,7 +46,9 @@ function toModelBet(row: {
 export const listDeals = query({
   args: {},
   handler: async (ctx): Promise<Deal[]> => {
-    const deals = await ctx.db.query("deals").collect();
+    const allDeals = await ctx.db.query("deals").collect();
+    // The probe deal is an internal architecture-proof deal — never on the board.
+    const deals = allDeals.filter((d) => d.dealId !== PROBE_DEAL_ID);
     const assembled = await Promise.all(
       deals.map(async (d) => {
         const betRows = await ctx.db
@@ -120,6 +123,31 @@ export const createDeal = mutation({
     } else {
       await ctx.db.insert("deals", patch);
     }
+  },
+});
+
+// Append a freshly-detected signal to a deal's dossier (idempotent on claim).
+// This is the "signal detection" event: new evidence arrives, then the panel
+// re-prices on it and the board odds move live via the subscription.
+export const addSignal = mutation({
+  args: {
+    dealId: v.string(),
+    signal: v.object({
+      source: v.string(),
+      claim: v.string(),
+      foundBy: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, { dealId, signal }) => {
+    const d = await ctx.db
+      .query("deals")
+      .withIndex("by_dealId", (q) => q.eq("dealId", dealId))
+      .unique();
+    if (!d) return;
+    if (d.dossier.signals.some((s) => s.claim === signal.claim)) return; // dedupe
+    await ctx.db.patch(d._id, {
+      dossier: { ...d.dossier, signals: [...d.dossier.signals, signal] },
+    });
   },
 });
 

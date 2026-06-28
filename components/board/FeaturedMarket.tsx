@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import type { Deal } from "@/lib/peitho/types";
 import { HERO_DEAL_ID } from "@/lib/peitho/config";
 import { CompanyLogo } from "./CompanyLogo";
+import { DetectSignal } from "./DetectSignal";
 import {
   ACTION_DISPLAY,
   actionLine,
@@ -118,22 +119,25 @@ export function FeaturedMarket({ deal, onClose }: { deal: Deal; onClose: () => v
             </div>
 
             {isHero && (
-              <button
-                onClick={run}
-                disabled={running || live}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {running || live ? (
-                  <>
-                    <span className="h-2 w-2 animate-ping rounded-full bg-primary-foreground" />
-                    Panel investigating…
-                  </>
-                ) : deal.bets.length > 0 ? (
-                  "Re-run the panel live"
-                ) : (
-                  "Run the panel live"
-                )}
-              </button>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <button
+                  onClick={run}
+                  disabled={running || live}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {running || live ? (
+                    <>
+                      <span className="h-2 w-2 animate-ping rounded-full bg-primary-foreground" />
+                      Panel investigating…
+                    </>
+                  ) : deal.bets.length > 0 ? (
+                    "Re-run the panel live"
+                  ) : (
+                    "Run the panel live"
+                  )}
+                </button>
+                <DetectSignal dealId={deal.id} />
+              </div>
             )}
           </div>
 
