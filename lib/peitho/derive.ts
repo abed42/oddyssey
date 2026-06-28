@@ -87,6 +87,7 @@ export function assembleDeal(input: {
   name: string;
   initials: string;
   logo?: string;
+  domain?: string;
   dossier: Dossier;
   bets: ModelBet[];
   status: DealStatus;
@@ -103,6 +104,7 @@ export function assembleDeal(input: {
     name: input.name,
     initials: input.initials,
     logo: input.logo,
+    domain: input.domain,
     dossier: input.dossier,
     bets: input.bets,
     consensus,

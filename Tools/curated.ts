@@ -34,13 +34,14 @@ console.log(`\n▸ building Convex's curated board (${CURATED.length} prospects)
 let n = 0;
 for (const domain of CURATED) {
   try {
-    const { name, initials, dossier, logo } = await enrichDossier({ domain, deep: true });
+    const { name, initials, dossier, logo, domain: resolved } = await enrichDossier({ domain, deep: true });
     const dealId = domain.split(".")[0].replace(/[^a-z0-9]/gi, "").slice(0, 24);
     await convex.mutation(api.deals.createDeal, {
       dealId,
       name,
       initials,
       logo,
+      domain: resolved,
       dossier,
       status: "cached",
     });

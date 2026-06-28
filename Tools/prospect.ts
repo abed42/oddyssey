@@ -60,7 +60,7 @@ let priced = 0;
 for (const domain of domains) {
   if (priced >= N) break;
   try {
-    const { name, initials, dossier, logo } = await enrichDossier({ domain, deep: true });
+    const { name, initials, dossier, logo, domain: resolved } = await enrichDossier({ domain, deep: true });
     if (dossier.signals.length < 2) continue; // skip thin records
     const dealId = domain.split(".")[0].replace(/[^a-z0-9]/gi, "").slice(0, 24);
     await convex.mutation(api.deals.createDeal, {
@@ -68,6 +68,7 @@ for (const domain of domains) {
       name,
       initials,
       logo,
+      domain: resolved,
       dossier,
       status: "cached",
     });

@@ -2,12 +2,13 @@
 
 import { motion } from "motion/react";
 import { modelDisplay } from "@/lib/peitho/display";
-import { ModelGlyph, modelCode } from "@/lib/peitho/modelIcons";
+import { ModelGlyph } from "@/lib/peitho/modelIcons";
 import { EASE_OUT } from "@/lib/ease";
 import { AnimatedNumber, fmtPct } from "@/components/AnimatedNumber";
 
 // One model's row in the AI-consensus block — the bettor, their lobehub avatar,
-// ticker code, price bar and price. The panel's top bet is shown at full opacity.
+// the model version it's running, price bar and price. The panel's top bet is
+// shown at full opacity.
 export function ModelBar({
   model,
   price,
@@ -17,12 +18,16 @@ export function ModelBar({
   price: number | null;
   isMax: boolean;
 }) {
-  const { color } = modelDisplay(model);
+  const { color, version } = modelDisplay(model);
   return (
     <div className="flex items-center gap-2">
       <ModelGlyph model={model} size={18} />
-      <span className="w-7 shrink-0 font-mono text-[10px] font-bold" style={{ color }}>
-        {modelCode(model)}
+      <span
+        className="w-[74px] shrink-0 truncate font-mono text-[10px] font-bold"
+        style={{ color }}
+        title={version}
+      >
+        {version}
       </span>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
         {price !== null && (

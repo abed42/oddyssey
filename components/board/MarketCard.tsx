@@ -31,6 +31,9 @@ export function MarketCard({ deal, onClick }: { deal: Deal; onClick?: () => void
           <p className="line-clamp-2 min-w-0 flex-1 text-sm font-semibold leading-tight text-foreground">
             Will {deal.name} convert?
           </p>
+          <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold ring-1 ${badge.cls}`}>
+            {badge.label}
+          </span>
         </div>
         <div className="mt-2 flex items-center gap-2 pl-12">
           <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -49,22 +52,22 @@ export function MarketCard({ deal, onClick }: { deal: Deal; onClick?: () => void
       <div className="px-4 pb-3">
         <div className="flex h-6 overflow-hidden rounded-lg text-xs font-bold">
           <motion.div
-            className="flex items-center justify-center overflow-hidden bg-primary text-primary-foreground"
+            className="flex items-center justify-center overflow-hidden bg-[#243933] text-[#10b981] transition-colors group-hover:bg-[#10b981] group-hover:text-white"
             initial={{ width: "50%" }}
             animate={{ width: `${yes}%` }}
             transition={{ duration: 1.2, ease: EASE_OUT }}
           >
             {yes >= 20 && <AnimatedNumber value={yes} format={fmtPct} />}
           </motion.div>
-          <div className="flex flex-1 items-center justify-center overflow-hidden bg-destructive text-white">
+          <div className="flex flex-1 items-center justify-center overflow-hidden bg-[#3B2426] text-[#FB2B37] transition-colors group-hover:bg-[#FB2B37] group-hover:text-white">
             {no >= 20 && <AnimatedNumber value={no} format={fmtPct} />}
           </div>
         </div>
         <div className="mt-1 flex justify-between">
-          <span className="text-[11px] font-semibold text-primary">
+          <span className="text-[11px] font-semibold text-[#10b981]">
             Yes <AnimatedNumber value={yes} format={fmtCents} />
           </span>
-          <span className="text-[11px] font-semibold text-destructive">
+          <span className="text-[11px] font-semibold text-[#FB2B37]">
             No <AnimatedNumber value={no} format={fmtCents} />
           </span>
         </div>
@@ -87,12 +90,9 @@ export function MarketCard({ deal, onClick }: { deal: Deal; onClick?: () => void
 
       {/* AI consensus — the four models as the bettors */}
       <div className="border-t border-border px-4 pb-3 pt-3">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             AI Consensus
-          </span>
-          <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ring-1 ${badge.cls}`}>
-            {badge.label}
           </span>
         </div>
         <div className="space-y-1">

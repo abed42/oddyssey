@@ -3,15 +3,20 @@
 
 import type { Deal, DealAction, DealTier, ModelBet } from "./types";
 
-export const MODEL_DISPLAY: Record<string, { label: string; color: string }> = {
-  claude: { label: "Claude", color: "#D97757" }, // clay
-  gpt: { label: "GPT", color: "#10A37F" }, // teal
-  gemini: { label: "Gemini", color: "#4285F4" }, // blue
-  grok: { label: "Grok", color: "#8B5CF6" }, // violet
+// `version` is the actual model behind each lens (keep in sync with the
+// gatewayModel in MODEL_LENSES) — shown next to the icon on the consensus rows.
+export const MODEL_DISPLAY: Record<
+  string,
+  { label: string; color: string; version: string }
+> = {
+  claude: { label: "Claude", color: "#D97757", version: "Sonnet 4.6" }, // clay
+  gpt: { label: "GPT", color: "#10A37F", version: "GPT-5.4" }, // teal
+  gemini: { label: "Gemini", color: "#4285F4", version: "Gemini 3 Pro" }, // blue
+  grok: { label: "Grok", color: "#8B5CF6", version: "Grok 4.1" }, // violet
 };
 
 export function modelDisplay(model: string) {
-  return MODEL_DISPLAY[model] ?? { label: model, color: "#64748b" };
+  return MODEL_DISPLAY[model] ?? { label: model, color: "#64748b", version: model };
 }
 
 export const ACTION_DISPLAY: Record<

@@ -18,6 +18,7 @@ export default defineSchema({
     name: v.string(),
     initials: v.string(),
     logo: v.optional(v.string()), // company logo URL (Orange Slice)
+    domain: v.optional(v.string()), // for live re-enrichment / signal detection
     dossier: v.object({
       summary: v.string(),
       signals: v.array(

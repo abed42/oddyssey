@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Peitho — go-to-market intelligence",
+  title: "Oddyssey — go-to-market intelligence",
   description:
     "A consensus prediction market for B2B purchase intent. Four frontier models price the same evidence; the spread is the signal.",
 };
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("dark font-sans", inter.variable, outfitHeading.variable)}>
+    <html lang="en" className={cn("dark font-heading", inter.variable, outfitHeading.variable)}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

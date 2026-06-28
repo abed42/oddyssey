@@ -89,7 +89,7 @@ export function FeaturedMarket({ deal, onClose }: { deal: Deal; onClose: () => v
           <div>
             <div className="mb-2 flex h-10 overflow-hidden rounded-xl text-sm font-bold">
               <motion.div
-                className="flex items-center justify-center gap-1 overflow-hidden bg-primary text-primary-foreground"
+                className="flex items-center justify-center gap-1 overflow-hidden bg-[#10b981] text-white"
                 initial={{ width: "50%" }}
                 animate={{ width: `${yes}%` }}
                 transition={{ duration: 1.2, ease: EASE_OUT }}
@@ -97,20 +97,20 @@ export function FeaturedMarket({ deal, onClose }: { deal: Deal; onClose: () => v
                 <span>Yes</span>
                 <AnimatedNumber value={yes} format={fmtPct} />
               </motion.div>
-              <div className="flex flex-1 items-center justify-center gap-1 overflow-hidden bg-destructive text-white">
+              <div className="flex flex-1 items-center justify-center gap-1 overflow-hidden bg-[#FB2B37] text-white">
                 <span>No</span>
                 <AnimatedNumber value={no} format={fmtPct} />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="rounded-lg bg-muted p-3 text-center">
-                <p className="text-lg font-bold tabular-nums text-primary">
+                <p className="text-lg font-bold tabular-nums text-[#10b981]">
                   <AnimatedNumber value={yes} format={fmtCents} />
                 </p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">Consensus Yes</p>
               </div>
               <div className="rounded-lg bg-muted p-3 text-center">
-                <p className="text-lg font-bold tabular-nums text-destructive">
+                <p className="text-lg font-bold tabular-nums text-[#FB2B37]">
                   <AnimatedNumber value={no} format={fmtCents} />
                 </p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">Consensus No</p>
@@ -182,22 +182,22 @@ export function FeaturedMarket({ deal, onClose }: { deal: Deal; onClose: () => v
                         {label}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-primary">
+                        <span className="text-[11px] font-bold text-[#10b981]">
                           Yes <AnimatedNumber value={b.price} format={fmtPct} />
                         </span>
-                        <span className="text-[11px] font-bold text-destructive">
+                        <span className="text-[11px] font-bold text-[#FB2B37]">
                           No <AnimatedNumber value={100 - b.price} format={fmtPct} />
                         </span>
                       </div>
                     </div>
                     <div className="flex h-2 overflow-hidden rounded-md">
                       <motion.div
-                        className="h-full overflow-hidden bg-primary"
+                        className="h-full overflow-hidden bg-[#10b981]"
                         initial={{ width: "50%" }}
                         animate={{ width: `${b.price}%` }}
                         transition={{ duration: 1.2, ease: EASE_OUT }}
                       />
-                      <div className="h-full flex-1 bg-destructive" />
+                      <div className="h-full flex-1 bg-[#FB2B37]" />
                     </div>
                     {b.rationale && (
                       <p className="mt-1.5 text-[11px] leading-snug text-foreground/80">

@@ -36,6 +36,7 @@ await convex.mutation(api.deals.createDeal, {
   name,
   initials,
   logo,
+  domain: resolved,
   dossier,
   status: "cached",
 });

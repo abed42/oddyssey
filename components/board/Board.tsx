@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { useQuery } from "convex/react";
 import { Search, Zap } from "lucide-react";
 import { Logomark } from "./Logomark";
+import { Wordmark } from "./Wordmark";
 import { SellerSwitcher } from "./SellerSwitcher";
 import { api } from "@/convex/_generated/api";
 import { ALL_MODELS, MODEL_LENSES, PRODUCT } from "@/lib/peitho/config";
@@ -56,9 +58,7 @@ export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
         <div className="mx-auto flex h-[60px] max-w-[1440px] items-center gap-6 px-6">
           <div className="flex shrink-0 items-center gap-2.5">
             <Logomark className="h-9 w-auto text-foreground" />
-            <span className="text-xl font-bold tracking-tight text-foreground">
-              {PRODUCT.name}
-            </span>
+            <Wordmark className="text-xl" />
             <span className="text-xl font-light text-muted-foreground">/</span>
             <SellerSwitcher />
           </div>
@@ -154,10 +154,21 @@ export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
           })}
         </div>
 
-        {/* Featured (click-to-expand) */}
-        {selected && (
-          <FeaturedMarket deal={selected} onClose={() => setSelectedId(null)} />
-        )}
+        {/* Featured (click-to-expand) — springy bouncy-accordion open/close */}
+        <AnimatePresence initial={false}>
+          {selected && (
+            <motion.div
+              key={selected.id}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.55, bounce: 0.3 }}
+              className="overflow-hidden"
+            >
+              <FeaturedMarket deal={selected} onClose={() => setSelectedId(null)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Grid header */}
         <div className="mb-4 flex items-center justify-between">
@@ -218,7 +229,7 @@ export function Board({ onColdOpen }: { onColdOpen?: () => void }) {
         <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2.5">
             <Logomark className="h-7 w-auto text-foreground" />
-            <span className="font-semibold text-foreground">{PRODUCT.name}</span>
+            <Wordmark className="text-sm" />
             <span>— {PRODUCT.tagline}</span>
           </div>
           <div className="flex gap-5">

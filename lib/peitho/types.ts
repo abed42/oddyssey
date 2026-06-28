@@ -43,6 +43,7 @@ export type Deal = {
   name: string;
   initials: string;
   logo?: string; // company logo URL (from Orange Slice enrichment)
+  domain?: string; // company domain — lets the engine re-enrich for live signals
   dossier: Dossier;
   bets: ModelBet[];
   consensus: number; // mean of prices, rounded
