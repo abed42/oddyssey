@@ -86,7 +86,7 @@ function StoryImage({ src, alt }: { src: string; alt: string }) {
         src={src}
         alt={alt}
         onError={() => setErr(true)}
-        className="mx-auto max-h-[330px] w-auto rounded-lg object-contain"
+        className="mx-auto max-h-[460px] w-auto rounded-lg object-contain"
       />
     </figure>
   );
@@ -96,7 +96,6 @@ export function Story({ onPivot }: { onPivot?: () => void }) {
   const [i, setI] = useState(0);
   const [pulse, setPulse] = useState<"up" | "down" | null>(null);
   const beat = STORY_BEATS[i];
-  const last = i === STORY_BEATS.length - 1;
 
   const consensusOf = (idx: number) => {
     const bs = STORY_BEATS[idx].bets;
@@ -113,11 +112,14 @@ export function Story({ onPivot }: { onPivot?: () => void }) {
   // Arrow-key navigation — left/right step the carousel.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") go(i + 1);
-      else if (e.key === "ArrowLeft") go(i - 1);
+      if (e.key === "ArrowRight") {
+        if (i >= STORY_BEATS.length - 1) onPivot?.();
+        else go(i + 1);
+      } else if (e.key === "ArrowLeft") go(i - 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i]);
 
   // Derived with the SAME pure function the live engine uses.
@@ -133,9 +135,9 @@ export function Story({ onPivot }: { onPivot?: () => void }) {
   const dirColor = pulse === "up" ? UP : DOWN;
 
   return (
-    <div className="mx-auto max-w-[1500px] px-5 py-5 sm:px-8">
+    <div className="mx-auto max-w-[1500px] px-5 pb-4 pt-2 sm:px-8">
       {/* the card — FIXED height + fixed-height bands so nothing jumps between beats */}
-      <div className="flex h-[86vh] min-h-[780px] w-full flex-col justify-center rounded-3xl border border-border/80 bg-gradient-to-b from-card to-card/40 px-6 py-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_18px_40px_-22px_rgba(0,0,0,0.8)] sm:px-12">
+      <div className="flex h-[88vh] min-h-[880px] w-full flex-col justify-start rounded-3xl border border-border/80 bg-gradient-to-b from-card to-card/40 px-6 pb-6 pt-7 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_18px_40px_-22px_rgba(0,0,0,0.8)] sm:px-12">
         <div className="flex flex-col items-center text-center">
           {/* signal badge — fixed slot so it never shifts the layout */}
           <div className="flex h-[30px] items-center justify-center">
@@ -163,7 +165,7 @@ export function Story({ onPivot }: { onPivot?: () => void }) {
           </p>
 
           {/* media — fixed reserved area; empty beats hold the same space */}
-          <div className="mt-6 flex h-[340px] w-full max-w-2xl items-center justify-center">
+          <div className="mt-6 flex h-[480px] w-full max-w-2xl items-center justify-center">
             {beat.media?.image && (
               <StoryImage key={beat.media.image} src={beat.media.image} alt={beat.media.alt ?? ""} />
             )}
@@ -171,37 +173,6 @@ export function Story({ onPivot }: { onPivot?: () => void }) {
         </div>
       </div>
 
-      {/* controls */}
-      <div className="mt-5 flex items-center justify-center gap-3">
-        <button
-          onClick={() => go(i - 1)}
-          disabled={i === 0}
-          className="rounded-full border border-border px-4 py-2 text-sm text-foreground transition hover:bg-muted disabled:opacity-40"
-        >
-          ← Back
-        </button>
-        {!last ? (
-          <button
-            onClick={() => go(i + 1)}
-            className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90"
-          >
-            Next →
-          </button>
-        ) : (
-          <button
-            onClick={onPivot}
-            className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90"
-          >
-            Pivot to the board →
-          </button>
-        )}
-        <button
-          onClick={() => go(0)}
-          className="rounded-full border border-border px-4 py-2 text-sm text-muted-foreground transition hover:bg-muted"
-        >
-          Restart
-        </button>
-      </div>
       {/* beat progress — at the bottom */}
       <div className="mt-5 flex items-center justify-center gap-2">
         {STORY_BEATS.map((b, idx) => (

@@ -103,7 +103,7 @@ export const STORY_BEATS: StoryBeat[] = [
     title: "We're in",
     narration:
       "We queue. We wait. And in the end — we're in. From 1% to a market we closed in person.",
-    media: { image: "/story/were-in.png", alt: "We made it in" },
+    media: { image: "/story/were-in.jpg", alt: "We made it in" },
     bets: [
       mb("claude", 99, 0.95, "Resolved in the room — relationship, presence, and persistence."),
       mb("gpt", 100, 0.96, "Converted. The timing question is finally answered."),
