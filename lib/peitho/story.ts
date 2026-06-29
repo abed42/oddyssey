@@ -43,6 +43,7 @@ export const STORY_BEATS: StoryBeat[] = [
     narration:
       "The organizer is Orange Slice. The name is familiar — I'd been on a prospect call with their CEO, Vihaar, about a year ago.",
     signal: true,
+    media: { image: "/story/hackathon-banner.png", alt: "AI Growth Hackathon by Orange Slice" },
     bets: [
       mb("claude", 14, 0.6, "A prior relationship with the organizer is exactly the warm edge that moves this."),
       mb("gpt", 8, 0.55, "A year-old call isn't a trigger — but it is a door."),
