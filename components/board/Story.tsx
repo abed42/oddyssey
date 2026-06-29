@@ -86,7 +86,7 @@ function StoryImage({ src, alt }: { src: string; alt: string }) {
         src={src}
         alt={alt}
         onError={() => setErr(true)}
-        className="mx-auto max-h-[460px] w-auto rounded-lg object-contain"
+        className="mx-auto max-h-[500px] w-auto rounded-lg object-contain"
       />
     </figure>
   );
@@ -137,7 +137,7 @@ export function Story({ onPivot }: { onPivot?: () => void }) {
   return (
     <div className="mx-auto max-w-[1500px] px-5 pb-4 pt-2 sm:px-8">
       {/* the card — FIXED height + fixed-height bands so nothing jumps between beats */}
-      <div className="flex h-[88vh] min-h-[880px] w-full flex-col justify-start rounded-3xl border border-border/80 bg-gradient-to-b from-card to-card/40 px-6 pb-6 pt-7 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_18px_40px_-22px_rgba(0,0,0,0.8)] sm:px-12">
+      <div className="flex h-[90vh] min-h-[940px] w-full flex-col justify-start rounded-3xl border border-border/80 bg-gradient-to-b from-card to-card/40 px-6 pb-6 pt-7 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_18px_40px_-22px_rgba(0,0,0,0.8)] sm:px-12">
         <div className="flex flex-col items-center text-center">
           {/* signal badge — fixed slot so it never shifts the layout */}
           <div className="flex h-[30px] items-center justify-center">
@@ -165,7 +165,7 @@ export function Story({ onPivot }: { onPivot?: () => void }) {
           </p>
 
           {/* media — fixed reserved area; empty beats hold the same space */}
-          <div className="mt-6 flex h-[480px] w-full max-w-2xl items-center justify-center">
+          <div className="mt-6 flex h-[520px] w-full max-w-4xl items-center justify-center">
             {beat.media?.image && (
               <StoryImage key={beat.media.image} src={beat.media.image} alt={beat.media.alt ?? ""} />
             )}
