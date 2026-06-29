@@ -10,6 +10,7 @@ export type StoryBeat = {
   narration: string; // what just happened
   bets: ModelBet[]; // the panel's read after this beat
   media?: { image?: string; alt?: string; loadingBar?: boolean }; // optional proof
+  signal?: boolean; // show a "signal detected" badge on this beat
 };
 
 const mb = (
@@ -28,8 +29,8 @@ export const STORY_BEATS: StoryBeat[] = [
   {
     title: "T-minus one day",
     narration:
-      "Friday — one day before the hackathon, and we only just heard about it. Applications had effectively closed.",
-    media: { loadingBar: true },
+      "I found out about this hackathon on Friday — one day before it started, and applications had effectively closed.",
+    media: { image: "/story/tomas-tweet.jpg", alt: "How I found out — the Orange Slice hackathon invite" },
     bets: [
       mb("claude", 2, 0.5, "A day out, with the window structurally closed. Brutal odds."),
       mb("gpt", 1, 0.62, "No realistic path I can see — timing is fatal here."),
@@ -41,6 +42,7 @@ export const STORY_BEATS: StoryBeat[] = [
     title: "Wait — I know that name",
     narration:
       "The organizer is Orange Slice. The name is familiar — I'd been on a prospect call with their CEO, Vihaar, about a year ago.",
+    signal: true,
     bets: [
       mb("claude", 14, 0.6, "A prior relationship with the organizer is exactly the warm edge that moves this."),
       mb("gpt", 8, 0.55, "A year-old call isn't a trigger — but it is a door."),
@@ -100,6 +102,7 @@ export const STORY_BEATS: StoryBeat[] = [
     title: "We're in",
     narration:
       "We queue. We wait. And in the end — we're in. From 1% to a market we closed in person.",
+    media: { image: "/story/were-in.png", alt: "We made it in" },
     bets: [
       mb("claude", 99, 0.95, "Resolved in the room — relationship, presence, and persistence."),
       mb("gpt", 100, 0.96, "Converted. The timing question is finally answered."),
