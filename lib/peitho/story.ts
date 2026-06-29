@@ -1,7 +1,7 @@
-// The scripted cold open — Abed getting into this hackathon, priced as a live
-// market. FULLY DETERMINISTIC: hardcoded beats, ZERO live model calls. Each beat
-// shifts the odds and the spread. Reuses the SAME derivation as the real engine,
-// so the story's gauge behaves identically to the board's.
+// The scripted cold open — the real story of how we got into this hackathon,
+// priced as a live market. FULLY DETERMINISTIC: hardcoded beats, ZERO live model
+// calls. Each beat shifts the odds and the spread. Reuses the SAME derivation as
+// the real engine, so the story's gauge behaves identically to the board's.
 
 import type { ModelBet } from "./types";
 
@@ -9,6 +9,7 @@ export type StoryBeat = {
   title: string; // the development
   narration: string; // what just happened
   bets: ModelBet[]; // the panel's read after this beat
+  media?: { image?: string; alt?: string; loadingBar?: boolean }; // optional proof
 };
 
 const mb = (
@@ -25,58 +26,84 @@ export const STORY_PROSPECT = {
 
 export const STORY_BEATS: StoryBeat[] = [
   {
-    title: "Found out late",
+    title: "T-minus one day",
     narration:
-      "Abed hears about the AI Growth Hackathon — but well after applications effectively closed.",
+      "Friday — one day before the hackathon, and we only just heard about it. Applications had effectively closed.",
+    media: { loadingBar: true },
     bets: [
-      mb("claude", 40, 0.5, "Strong founder-event fit, but a late start is a real structural disadvantage."),
-      mb("gpt", 18, 0.6, "Window has basically closed — timing is working hard against this."),
-      mb("gemini", 30, 0.45, "No momentum signal yet, just an intention."),
-      mb("grok", 22, 0.4, "Nothing live to confirm any traction. Skeptical."),
+      mb("claude", 2, 0.5, "A day out, with the window structurally closed. Brutal odds."),
+      mb("gpt", 1, 0.62, "No realistic path I can see — timing is fatal here."),
+      mb("gemini", 1, 0.45, "No momentum, just an intention. Nothing to price up."),
+      mb("grok", 0, 0.4, "Nothing live to confirm. This basically doesn't happen."),
     ],
   },
   {
-    title: "The Orange Slice connection",
+    title: "Wait — I know that name",
     narration:
-      "It's organized by Orange Slice — and Abed was on a call with their CEO about a year ago.",
+      "The organizer is Orange Slice. The name is familiar — I'd been on a prospect call with their CEO, Vihaar, about a year ago.",
     bets: [
-      mb("claude", 62, 0.62, "A prior relationship with the organizer is exactly the warm fit that moves odds."),
-      mb("gpt", 45, 0.55, "A year-old call isn't a current trigger, but it's a door."),
-      mb("gemini", 48, 0.5, "Network signal improving; still no concrete movement."),
-      mb("grok", 58, 0.58, "A real human connection — that's a live signal I'll weight up."),
+      mb("claude", 14, 0.6, "A prior relationship with the organizer is exactly the warm edge that moves this."),
+      mb("gpt", 8, 0.55, "A year-old call isn't a trigger — but it is a door."),
+      mb("gemini", 9, 0.5, "A network signal appears; still nothing concrete."),
+      mb("grok", 9, 0.52, "A real human connection. I'll weight that up a little."),
     ],
   },
   {
-    title: "Vihaar replies, forwards to YC",
+    title: "The cold email",
     narration:
-      "Abed emails Vihaar. He replies “would love to have you” — and forwards it to YC.",
+      "So I email Vihaar directly — remind him of the call, mention I'm in town, and ask if there's any chance to get us in.",
+    media: { image: "/story/email-to-vihaar.png", alt: "Email to Vihaar asking to join" },
     bets: [
-      mb("claude", 82, 0.8, "Direct invite plus an internal forward — real institutional pull now."),
-      mb("gpt", 85, 0.82, "Active, time-sensitive intro in motion this minute. Strong trigger."),
-      mb("gemini", 80, 0.78, "Clear forward momentum; the funnel is advancing fast."),
-      mb("grok", 84, 0.75, "Founder publicly says ‘would love to have you’ — hard to argue with."),
+      mb("claude", 18, 0.62, "He took the ask straight to the decision-maker. Correct move."),
+      mb("gpt", 13, 0.55, "A reach-out isn't a yes, but the funnel is moving."),
+      mb("gemini", 14, 0.5, "Intent is now an action — a slight lift."),
+      mb("grok", 15, 0.55, "He shot his shot. That's a live attempt."),
     ],
   },
   {
-    title: "YC ops says it's full",
+    title: "Vihaar forwards it to YC",
     narration:
-      "Then YC operations comes back: the event is full. Does a founder's vouch override ops?",
+      "Vihaar replies: “Just forwarded this to the YC team, would love to have you!” — the CEO himself, vouching.",
+    media: { image: "/story/vihaar-reply.png", alt: "Vihaar replies and forwards to YC" },
     bets: [
-      mb("claude", 72, 0.6, "A founder vouch usually overrides ops capacity — I stay fairly high."),
-      mb("gpt", 45, 0.55, "‘Full’ is a hard stop on timing; this likely doesn't close in time."),
-      mb("gemini", 50, 0.5, "Mixed — momentum stalled against a capacity wall."),
-      mb("grok", 78, 0.62, "Founder intent is live and strong; ops is a process detail. Bullish."),
+      mb("claude", 34, 0.78, "Founder vouch plus an internal forward — that's real institutional pull."),
+      mb("gpt", 28, 0.72, "A warm intro in motion this minute. Strong, time-sensitive trigger."),
+      mb("gemini", 30, 0.7, "The funnel is advancing fast now."),
+      mb("grok", 28, 0.7, "The CEO says yes in writing. Hard to argue with."),
     ],
   },
   {
-    title: "Shows up in person",
+    title: "YC says it's full",
     narration:
-      "Abed shows up in person and reconnects directly. He's in.",
+      "Then YC operations comes back: the event is full. Does a founder's vouch override an ops “no”? The panel splits.",
+    media: { image: "/story/yc-rejection.png", alt: "YC rejection — the event is full" },
     bets: [
-      mb("claude", 92, 0.9, "In-person reconnection closes it — fit, relationship, and presence."),
-      mb("gpt", 95, 0.92, "Resolved in the room. The timing question is answered."),
-      mb("gemini", 90, 0.88, "Converted. Full momentum."),
-      mb("grok", 96, 0.9, "He's physically in. Confirmed."),
+      mb("claude", 28, 0.58, "A founder vouch usually beats ops capacity — I stay relatively high."),
+      mb("gpt", 12, 0.6, "“Full” is a hard stop. This likely doesn't close in time."),
+      mb("gemini", 18, 0.5, "Momentum stalled against a capacity wall."),
+      mb("grok", 22, 0.55, "Founder intent is still live; ops is a process detail. I hold."),
+    ],
+  },
+  {
+    title: "Show up anyway",
+    narration:
+      "We show up in person. I spot Vihaar through the window, catch him on camera, and make the case. Vihaar: “Fifty-fifty I can get you in.”",
+    bets: [
+      mb("claude", 52, 0.7, "In person, and the founder himself put it at 50/50. A live coin flip."),
+      mb("gpt", 46, 0.66, "A genuine coin flip — but it's happening in real time, in the room."),
+      mb("gemini", 50, 0.64, "Momentum is back; the outcome is truly open."),
+      mb("grok", 52, 0.7, "He's talking to us face to face. That's as live as a signal gets."),
+    ],
+  },
+  {
+    title: "We're in",
+    narration:
+      "We queue. We wait. And in the end — we're in. From 1% to a market we closed in person.",
+    bets: [
+      mb("claude", 99, 0.95, "Resolved in the room — relationship, presence, and persistence."),
+      mb("gpt", 100, 0.96, "Converted. The timing question is finally answered."),
+      mb("gemini", 99, 0.93, "Full momentum. Done."),
+      mb("grok", 100, 0.95, "Physically inside. Confirmed."),
     ],
   },
 ];
