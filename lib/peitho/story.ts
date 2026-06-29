@@ -88,6 +88,7 @@ export const STORY_BEATS: StoryBeat[] = [
     title: "Show up anyway",
     narration:
       "We show up in person. I spot Vihaar through the window, catch him on camera, and make the case. Vihaar: “Fifty-fifty I can get you in.”",
+    media: { image: "/story/vihaar-window.png", alt: "Vihaar at the window" },
     bets: [
       mb("claude", 52, 0.7, "In person, and the founder himself put it at 50/50. A live coin flip."),
       mb("gpt", 46, 0.66, "A genuine coin flip — but it's happening in real time, in the room."),
